@@ -30,20 +30,19 @@ func covertToMatches(text: String) -> [String] {
 }
 
 func converMatchesToPlayground(lines: [String]) -> String {
-    var result = ["/*:"]
-    for line in lines {
+    let result:[[String]] = [["/*:"]] + lines.map { line in
         if line.hasPrefix("``` swift") {
-            result += ["*/"]
+            return ["*/"]
         } else if line.hasPrefix("```") {
-            result += ["/*:"]
+            return ["/*:"]
         } else if line.isEmpty {
-            // don't do anything
+           return []
         } else {
-            result += [line]
+            return [line]
         }
-    }
-    result += ["*/"]
-    return result.joined(separator: "\n")
+    } + [["*/"]]
+    let flat = result.flatMap { $0 }
+    return flat.joined(separator: "\n")
 }
 
 
@@ -51,24 +50,22 @@ func converMatchesToMarkdown(lines: [String]) -> String {
     func replace(prefix: String, line: String) -> String {
         return String(line[prefix.endIndex...]) // very unsatisfactory Subsequence conversion here, this is better than the deprcated substring?
     }
-    var result: [String] = []
-    for line in lines {
+    
+    let result: [[String]] = lines.map { line in
         if line.hasPrefix("/*:") {
-            result += [replace(prefix: "/*:", line: line)]
-            result += ["```"]
-        } else if line.hasPrefix("//:", line: line) {
-            result += [replace(prefix: "//:")]
-        } else if line.hasPrefix("*/", line: line) {
-            result += [replace(prefix: "*/")]
-            result += ["``` swift"]
+            return [replace(prefix: "/*:", line: line), "```"]
+        } else if line.hasPrefix("//:") {
+            return [replace(prefix: "//:", line: line)]
+        } else if line.hasPrefix("*/") {
+            return [replace(prefix: "*/", line: line),  "``` swift"]
         } else if line.isEmpty {
-            // don't do anything
+            return []
         } else {
-            result += [line]
+            return [line]
         }
     }
-    result = [String](result.dropFirst().dropLast())
-    return result.joined(separator: "\n")
+    let flattenResult = (result.dropFirst().dropLast()).flatMap { $0 }
+    return flattenResult.joined(separator: "\n")
 }
 
 let lines = covertToMatches(text: text)

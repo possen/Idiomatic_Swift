@@ -1,10 +1,5 @@
 
 import Foundation
-
-for i in 0...5 {
-    print(i << 2)
-}
-
 /*:
  # Transforming Code into Beautiful, Idiomatic Swift
 
